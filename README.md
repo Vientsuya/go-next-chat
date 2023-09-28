@@ -1,4 +1,4 @@
-# Settings up the project
+# Setting up the project
 ## Server 
 
 ### Enabling the server
@@ -29,3 +29,8 @@ CLIENT_ORIGIN=http://localhost:3000
 1. use `sudo docker inspect <container-name>` (default is `postgres`)
 2. Look at `NetworkSettings` and find `IPAddress` property.
 3. Near the top is tcp/ip port which you also need to provide. (default is `5432`)
+
+### Migrations
+1. Create new migration using
+    `create -ext <extension> <files-location> <migration-name>`  
+    example: `create -ext sql db/migrations add_users_table`
