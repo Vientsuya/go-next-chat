@@ -34,3 +34,7 @@ CLIENT_ORIGIN=http://localhost:3000
 1. Create new migration using
     `create -ext <extension> <files-location> <migration-name>`  
     example: `create -ext sql db/migrations add_users_table`
+2. To migrate use
+```
+migrate -path db/migrations -database "postgresql://admin:password123@127.0.0.1:6500/golang_chat?sslmode=disable" -verbose up
+```

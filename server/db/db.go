@@ -22,6 +22,18 @@ func NewDatabase(config *Config) (*Database, error) {
 		config.DBName+
 		"?sslmode=disable")
 
+	log.Println("postgresql://" +
+		config.DBUserName +
+		":" +
+		config.DBUserPassword +
+		"@" +
+		config.DBHost +
+		":" +
+		config.DBPort +
+		"/" +
+		config.DBName +
+		"?sslmode=disable")
+
 	if err != nil {
 		return nil, err
 	}
