@@ -5,6 +5,7 @@ import (
 	"log"
 	"server/db"
 	"server/internal/user"
+	"server/router"
 )
 
 func main() {
@@ -22,4 +23,9 @@ func main() {
 	userService := user.NewService(userRepository)
 	userHandler := user.NewHandler(userService)
 
+	router.InitRouter(userHandler)
+	err = router.Start("0.0.0.0:8038")
+	if err != nil {
+		log.Fatal("Couldn't start the router")
+	}
 }
