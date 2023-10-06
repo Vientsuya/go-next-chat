@@ -15,19 +15,47 @@ func NewHandler(service Service) *Handler {
 	}
 }
 
-func (h *Handler) CreateUser(context *gin.Context) {
+func (h *Handler) CreateUser(ctx *gin.Context) {
 	var u CreateUserReq
-	err := context.ShouldBindJSON(&u)
+	err := ctx.ShouldBindJSON(&u)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	res, err := h.Service.CreateUser(context.Request.Context(), &u)
+	res, err := h.Service.CreateUser(ctx.Request.Context(), &u)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	context.JSON(http.StatusOK, res)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) Login(c *gin.Context) {
+	var user LoginUserReq
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	u, err := h.Service.Login(c.Request.Context(), &user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.SetCookie("jwt", u.accessToken, 3600, "/", "localhost", false, true)
+
+	res := &LoginUserRes{
+		Username: u.Username,
+		ID:       u.ID,
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) Logout(c *gin.Context) {
+	c.SetCookie("jwt", "", -1, "", "", false, true)
+	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }

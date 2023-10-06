@@ -2,6 +2,9 @@ package user
 
 import (
 	"context"
+	"github.com/golang-jwt/jwt/v4"
+	"log"
+	"server/db"
 	"server/util"
 	"strconv"
 	"time"
@@ -19,8 +22,8 @@ func NewService(repository Repository) Service {
 	}
 }
 
-func (service *service) CreateUser(c context.Context, req *CreateUserReq) (*CreateUserRes, error) {
-	ctx, cancel := context.WithTimeout(c, service.timeout)
+func (s *service) CreateUser(c context.Context, req *CreateUserReq) (*CreateUserRes, error) {
+	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()
 
 	hashedPassword, err := util.HashPassword(req.Password)
@@ -34,7 +37,7 @@ func (service *service) CreateUser(c context.Context, req *CreateUserReq) (*Crea
 		Password: hashedPassword,
 	}
 
-	r, err := service.Repository.CreateUser(ctx, user)
+	r, err := s.Repository.CreateUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -46,4 +49,49 @@ func (service *service) CreateUser(c context.Context, req *CreateUserReq) (*Crea
 	}
 
 	return res, nil
+}
+
+type MyJWTClaims struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
+func (s *service) Login(c context.Context, req *LoginUserReq) (*LoginUserRes, error) {
+	ctx, cancel := context.WithTimeout(c, s.timeout)
+	defer cancel()
+
+	u, err := s.Repository.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		return &LoginUserRes{}, err
+	}
+
+	err = util.CheckPassword(req.Password, u.Password)
+	if err != nil {
+		return &LoginUserRes{}, err
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, MyJWTClaims{
+		ID:       strconv.Itoa(int(u.ID)),
+		Username: u.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    strconv.Itoa(int(u.ID)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		},
+	})
+
+	config, err := db.LoadConfig(".")
+	if err != nil {
+		log.Fatal("Couldn't read the jwt secret key")
+	}
+	ss, err := token.SignedString([]byte(config.JWTSecretKey))
+	if err != nil {
+		return &LoginUserRes{}, err
+	}
+
+	return &LoginUserRes{
+		accessToken: ss,
+		Username:    u.Username,
+		ID:          strconv.Itoa(int(u.ID)),
+	}, nil
 }

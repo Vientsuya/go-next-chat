@@ -10,6 +10,8 @@ type Config struct {
 	DBPort         string `mapstructure:"POSTGRES_PORT"`
 
 	ClientOrigin string `mapstructure:"CLIENT_ORIGIN"`
+
+	JWTSecretKey string `mapstructure:"JWT_SECRET_KEY"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {
