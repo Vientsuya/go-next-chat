@@ -3,18 +3,22 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"server/internal/user"
+	"server/internal/ws"
 )
 
-var r *gin.Engine
+var router *gin.Engine
 
-func InitRouter(userHandler *user.Handler) {
-	r = gin.Default()
+func InitRouter(userHandler *user.Handler, wsHandler *ws.Handler) {
+	router = gin.Default()
 
-	r.POST("/signup", userHandler.CreateUser)
-	r.POST("/login", userHandler.Login)
-	r.GET("/logout", userHandler.Logout)
+	router.POST("/signup", userHandler.CreateUser)
+	router.POST("/login", userHandler.Login)
+	router.GET("/logout", userHandler.Logout)
+
+	router.POST("/ws/createRoom", wsHandler.CreateRoom)
+	router.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
 }
 
 func Start(addr string) error {
-	return r.Run(addr)
+	return router.Run(addr)
 }
