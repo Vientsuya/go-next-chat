@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "autosize": "^6.0.1",
     "next": "13.5.4",
     "react": "^18",
     "react-dom": "^18",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/autosize": "^4.0.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -29,13 +31,13 @@
     "typescript": "^5"
   },
   "prettier": {
-    "printWidth": 80,
+    "printWidth": 120,
     "semi": true,
     "bracketSameLine": true,
     "trailingComma": "es5",
     "tabWidth": 2,
     "singleQuote": true,
-    "bracketSpacing": false,
+    "bracketSpacing": true,
     "arrowParens": "always",
     "singleAttributePerLine": true,
     "plugins": [
